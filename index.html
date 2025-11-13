@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plataforma de Matemáticas</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        // Iconos SVG
+        const Calculator = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+            </svg>
+        );
+
+        const ArrowLeft = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+        );
+
+        const Eye = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+        );
+
+        const EyeOff = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+            </svg>
+        );
+
+        const RefreshCw = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+        );
+
+        const MathApp = () => {
+            const [screen, setScreen] = useState('home');
+            const [selectedTopic, setSelectedTopic] = useState(null);
+            const [selectedDifficulty, setSelectedDifficulty] = useState(null);
+            const [currentExercise, setCurrentExercise] = useState(null);
+            const [showAnswer, setShowAnswer] = useState(false);
+
+            // Generador de ejercicios de potenciación
+            const generatePowerExercise = (difficulty) => {
+                let base, exponent, answer;
+                
+                if (difficulty === 'facil') {
+                    base = Math.floor(Math.random() * 10) + 1;
+                    exponent = Math.floor(Math.random() * 4) + 2;
+                    answer = Math.pow(base, exponent);
+                    return {
+                        question: `${base}^${exponent}`,
+                        answer: answer.toString(),
+                        explanation: `${base} elevado a la ${exponent} = ${answer}`
+                    };
+                } else if (difficulty === 'medio') {
+                    base = Math.floor(Math.random() * 15) + 1;
+                    exponent = Math.floor(Math.random() * 5) + 2;
+                    answer = Math.pow(base, exponent);
+                    return {
+                        question: `${base}^${exponent}`,
+                        answer: answer.toString(),
+                        explanation: `${base} elevado a la ${exponent} = ${answer}`
+                    };
+                } else {
+                    const isNegativeBase = Math.random() > 0.5;
+                    base = Math.floor(Math.random() * 20) + 1;
+                    exponent = Math.floor(Math.random() * 6) + 2;
+                    
+                    if (isNegativeBase) {
+                        answer = Math.pow(-base, exponent);
+                        return {
+                            question: `(-${base})^${exponent}`,
+                            answer: answer.toString(),
+                            explanation: `(-${base}) elevado a la ${exponent} = ${answer}`
+                        };
+                    } else {
+                        answer = Math.pow(base, exponent);
+                        return {
+                            question: `${base}^${exponent}`,
+                            answer: answer.toString(),
+                            explanation: `${base} elevado a la ${exponent} = ${answer}`
+                        };
+                    }
+                }
+            };
+
+            // Generador de ejercicios de radicación
+            const generateRootExercise = (difficulty) => {
+                let radicand, index, answer;
+                
+                if (difficulty === 'facil') {
+                    answer = Math.floor(Math.random() * 10) + 1;
+                    index = 2;
+                    radicand = Math.pow(answer, index);
+                    return {
+                        question: `√${radicand}`,
+                        answer: answer.toString(),
+                        explanation: `La raíz cuadrada de ${radicand} = ${answer}`
+                    };
+                } else if (difficulty === 'medio') {
+                    answer = Math.floor(Math.random() * 15) + 1;
+                    index = Math.random() > 0.5 ? 2 : 3;
+                    radicand = Math.pow(answer, index);
+                    return {
+                        question: index === 2 ? `√${radicand}` : `∛${radicand}`,
+                        answer: answer.toString(),
+                        explanation: `La raíz ${index === 2 ? 'cuadrada' : 'cúbica'} de ${radicand} = ${answer}`
+                    };
+                } else {
+                    answer = Math.floor(Math.random() * 12) + 1;
+                    index = [2, 3, 4][Math.floor(Math.random() * 3)];
+                    radicand = Math.pow(answer, index);
+                    const indexSymbol = index === 2 ? '√' : index === 3 ? '∛' : `⁴√`;
+                    return {
+                        question: `${indexSymbol}${radicand}`,
+                        answer: answer.toString(),
+                        explanation: `La raíz ${index}ª de ${radicand} = ${answer}`
+                    };
+                }
+            };
+
+            const generateExercise = () => {
+                setShowAnswer(false);
+                let exercise;
+                if (selectedTopic === 'potenciacion') {
+                    exercise = generatePowerExercise(selectedDifficulty);
+                } else {
+                    exercise = generateRootExercise(selectedDifficulty);
+                }
+                setCurrentExercise(exercise);
+            };
+
+            const selectTopic = (topic) => {
+                setSelectedTopic(topic);
+                setScreen('difficulty');
+            };
+
+            const selectDifficulty = (difficulty) => {
+                setSelectedDifficulty(difficulty);
+                setScreen('exercise');
+                generateExercise();
+            };
+
+            const goBack = () => {
+                if (screen === 'exercise') {
+                    setScreen('difficulty');
+                    setCurrentExercise(null);
+                    setShowAnswer(false);
+                } else if (screen === 'difficulty') {
+                    setScreen('topics');
+                    setSelectedDifficulty(null);
+                } else if (screen === 'topics') {
+                    setScreen('home');
+                    setSelectedTopic(null);
+                }
+            };
+
+            // Pantalla de inicio
+            if (screen === 'home') {
+                return (
+                    <div className="min-h-screen bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center p-4">
+                        <div className="bg-white rounded-3xl shadow-2xl p-12 max-w-2xl w-full text-center">
+                            <Calculator className="w-24 h-24 mx-auto mb-6 text-purple-600" />
+                            <h1 className="text-5xl font-bold text-gray-800 mb-4">
+                                Matemáticas Interactivas
+                            </h1>
+                            <p className="text-xl text-gray-600 mb-8">
+                                Mejora tus habilidades matemáticas con ejercicios prácticos
+                            </p>
+                            <button
+                                onClick={() => setScreen('topics')}
+                                className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-12 py-4 rounded-full text-xl font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                            >
+                                Comenzar a Practicar
+                            </button>
+                        </div>
+                    </div>
+                );
+            }
+
+            // Pantalla de selección de temas
+            if (screen === 'topics') {
+                return (
+                    <div className="min-h-screen bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 p-8">
+                        <div className="max-w-4xl mx-auto">
+                            <button
+                                onClick={goBack}
+                                className="mb-6 flex items-center text-white hover:text-gray-200 transition-colors"
+                            >
+                                <ArrowLeft className="w-5 h-5 mr-2" />
+                                Volver
+                            </button>
+                            
+                            <div className="bg-white rounded-3xl shadow-2xl p-8">
+                                <h2 className="text-4xl font-bold text-gray-800 mb-8 text-center">
+                                    Selecciona un Tema
+                                </h2>
+                                
+                                <div className="grid md:grid-cols-2 gap-6">
+                                    <div
+                                        onClick={() => selectTopic('potenciacion')}
+                                        className="bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl p-8 cursor-pointer hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+                                    >
+                                        <h3 className="text-3xl font-bold text-white mb-3">
+                                            Potenciación
+                                        </h3>
+                                        <p className="text-blue-100 text-lg">
+                                            Practica con exponentes y potencias
+                                        </p>
+                                        <div className="mt-4 text-white text-2xl font-mono">
+                                            2³ = 8
+                                        </div>
+                                    </div>
+                                    
+                                    <div
+                                        onClick={() => selectTopic('radicacion')}
+                                        className="bg-gradient-to-br from-purple-400 to-purple-600 rounded-2xl p-8 cursor-pointer hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+                                    >
+                                        <h3 className="text-3xl font-bold text-white mb-3">
+                                            Radicación
+                                        </h3>
+                                        <p className="text-purple-100 text-lg">
+                                            Practica con raíces y radicales
+                                        </p>
+                                        <div className="mt-4 text-white text-2xl font-mono">
+                                            √16 = 4
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            // Pantalla de selección de dificultad
+            if (screen === 'difficulty') {
+                const topicName = selectedTopic === 'potenciacion' ? 'Potenciación' : 'Radicación';
+                
+                return (
+                    <div className="min-h-screen bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 p-8">
+                        <div className="max-w-4xl mx-auto">
+                            <button
+                                onClick={goBack}
+                                className="mb-6 flex items-center text-white hover:text-gray-200 transition-colors"
+                            >
+                                <ArrowLeft className="w-5 h-5 mr-2" />
+                                Volver
+                            </button>
+                            
+                            <div className="bg-white rounded-3xl shadow-2xl p-8">
+                                <h2 className="text-4xl font-bold text-gray-800 mb-3 text-center">
+                                    {topicName}
+                                </h2>
+                                <p className="text-gray-600 text-center mb-8 text-lg">
+                                    Selecciona el nivel de dificultad
+                                </p>
+                                
+                                <div className="grid md:grid-cols-3 gap-6">
+                                    <div
+                                        onClick={() => selectDifficulty('facil')}
+                                        className="bg-gradient-to-br from-green-400 to-green-600 rounded-2xl p-8 cursor-pointer hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+                                    >
+                                        <h3 className="text-2xl font-bold text-white mb-3 text-center">
+                                            Fácil
+                                        </h3>
+                                        <p className="text-green-100 text-center">
+                                            Ejercicios básicos para comenzar
+                                        </p>
+                                    </div>
+                                    
+                                    <div
+                                        onClick={() => selectDifficulty('medio')}
+                                        className="bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl p-8 cursor-pointer hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+                                    >
+                                        <h3 className="text-2xl font-bold text-white mb-3 text-center">
+                                            Medio
+                                        </h3>
+                                        <p className="text-yellow-100 text-center">
+                                            Ejercicios de nivel intermedio
+                                        </p>
+                                    </div>
+                                    
+                                    <div
+                                        onClick={() => selectDifficulty('dificil')}
+                                        className="bg-gradient-to-br from-red-400 to-red-600 rounded-2xl p-8 cursor-pointer hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+                                    >
+                                        <h3 className="text-2xl font-bold text-white mb-3 text-center">
+                                            Difícil
+                                        </h3>
+                                        <p className="text-red-100 text-center">
+                                            Desafíos avanzados
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            // Pantalla de ejercicios
+            if (screen === 'exercise') {
+                const topicName = selectedTopic === 'potenciacion' ? 'Potenciación' : 'Radicación';
+                const difficultyColors = {
+                    facil: 'from-green-500 to-green-600',
+                    medio: 'from-yellow-500 to-orange-600',
+                    dificil: 'from-red-500 to-red-600'
+                };
+                
+                return (
+                    <div className="min-h-screen bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 p-8">
+                        <div className="max-w-3xl mx-auto">
+                            <button
+                                onClick={goBack}
+                                className="mb-6 flex items-center text-white hover:text-gray-200 transition-colors"
+                            >
+                                <ArrowLeft className="w-5 h-5 mr-2" />
+                                Volver
+                            </button>
+                            
+                            <div className="bg-white rounded-3xl shadow-2xl p-12">
+                                <div className="text-center mb-8">
+                                    <h2 className="text-3xl font-bold text-gray-800 mb-2">
+                                        {topicName}
+                                    </h2>
+                                    <span className={`inline-block bg-gradient-to-r ${difficultyColors[selectedDifficulty]} text-white px-6 py-2 rounded-full text-sm font-semibold uppercase`}>
+                                        Nivel {selectedDifficulty}
+                                    </span>
+                                </div>
+                                
+                                {currentExercise && (
+                                    <div className="mb-8">
+                                        <div className="bg-gray-100 rounded-2xl p-12 mb-6">
+                                            <p className="text-gray-600 text-lg mb-4 text-center">
+                                                Resuelve:
+                                            </p>
+                                            <p className="text-6xl font-bold text-gray-800 text-center font-mono">
+                                                {currentExercise.question}
+                                            </p>
+                                        </div>
+                                        
+                                        {showAnswer && (
+                                            <div className="bg-gradient-to-r from-green-100 to-blue-100 rounded-2xl p-8 mb-6 border-2 border-green-300">
+                                                <p className="text-gray-700 text-lg mb-2 text-center font-semibold">
+                                                    Respuesta:
+                                                </p>
+                                                <p className="text-5xl font-bold text-green-700 text-center font-mono mb-3">
+                                                    {currentExercise.answer}
+                                                </p>
+                                                <p className="text-gray-600 text-center">
+                                                    {currentExercise.explanation}
+                                                </p>
+                                            </div>
+                                        )}
+                                        
+                                        <div className="flex gap-4 justify-center">
+                                            <button
+                                                onClick={() => setShowAnswer(!showAnswer)}
+                                                className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-4 rounded-full font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                                            >
+                                                {showAnswer ? (
+                                                    <>
+                                                        <EyeOff className="w-5 h-5" />
+                                                        Ocultar Respuesta
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Eye className="w-5 h-5" />
+                                                        Mostrar Respuesta
+                                                    </>
+                                                )}
+                                            </button>
+                                            
+                                            <button
+                                                onClick={generateExercise}
+                                                className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-4 rounded-full font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                                            >
+                                                <RefreshCw className="w-5 h-5" />
+                                                Nuevo Ejercicio
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            return null;
+        };
+
+        ReactDOM.render(<MathApp />, document.getElementById('root'));
+    </script>
+</body>
+</html>
